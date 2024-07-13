@@ -31,32 +31,42 @@ def simplex(c, A, b):
         Ab = A[:, B]
         An = A[:, N]
         
+        # Solução básica atual
         xb = np.linalg.solve(Ab, b)
         
+        # Multiplicadores simplex
         lambd = np.linalg.solve(Ab.T, cb)
         
+        # Custos reduzidos
         reduced_costs = cn - An.T @ lambd
         
         print(f"Iteração: {iteration}")
         print(f"Tempo(s): {time.time() - start_time:.4f}")
         print(f"Objetivo: {c[B] @ xb:.4f}")
         
+        # Verificar se todos os custos reduzidos são não-negativos
         if all(reduced_costs >= 0):
             x = np.zeros(n + m)
             x[B] = xb
             return x[:n], c @ x
         
+        # Selecionar a variável de entrada
         entering = N[np.argmin(reduced_costs)]
         
+        # Direção de busca
         direction = np.linalg.solve(Ab, A[:, entering])
         
+        # Verificar se o problema é ilimitado
         if all(direction <= 0):
             raise ValueError("Problema ilimitado")
         
+        # Razão mínima
         ratios = np.array([xb[i] / direction[i] if direction[i] > 0 else np.inf for i in range(m)])
         
+        # Selecionar a variável de saída
         leaving = B[np.argmin(ratios)]
         
+        # Atualizar as bases
         B[B.index(leaving)] = entering
         N[N.index(entering)] = leaving
         
